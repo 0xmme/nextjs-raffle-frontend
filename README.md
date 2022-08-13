@@ -23,10 +23,10 @@
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
-<h3 align="center">Hardhat Solidity raffle / lottery project</h3>
+<h3 align="center">NextJS project as frontend for ethereum blockchain raffle</h3>
 
   <p align="center">
-    This is a raffle / lottery project made with Hardhat and Solidity, consisting of the contracts, deployments and tests.
+    This is a frontend with NextJS to my smart contract raffle on rinkeby ethereum.
     <br />
     <!--<a href="https://github.com/mme022/nextjs-raffle-frontend"><strong>Explore the docs »</strong></a>
     <br />
