@@ -4,3 +4,4 @@ cache
 coverage
 package.json
 typechain-types/
+components/ManualHeader.tsx
