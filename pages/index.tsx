@@ -3,6 +3,7 @@ import Head from "next/head";
 import Image from "next/image";
 import ManualHeader from "../components/ManualHeader";
 import Header from "../components/Header";
+import RaffleEntrance from "../components/RaffleEntrance";
 import styles from "../styles/Home.module.css";
 
 const Home: NextPage = () => {
@@ -17,6 +18,7 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Header />
+      <RaffleEntrance />
     </div>
   );
 };
