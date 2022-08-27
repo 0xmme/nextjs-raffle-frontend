@@ -1,2 +1,9 @@
-export { default as contractAddresses } from "./contractAddresses.json";
-export { default as abi } from "./abi.json";
+import abi from "./abi.json";
+import contractAddresses from "./contractAddresses.json";
+
+interface ContractAddressInfo {
+  [chainId: string]: string[];
+}
+
+export const ABI = abi;
+export const CONTRACT_ADDRESSES: ContractAddressInfo = contractAddresses;

@@ -1,13 +1,8 @@
 import { NextPage } from "next";
 import { useWeb3Contract, useMoralis } from "react-moralis";
 import { parseEther } from "ethers/lib/utils";
-import { contractAddresses, abi } from "../constants/index";
-import {
-  JSXElementConstructor,
-  ReactElement,
-  useEffect,
-  useState,
-} from "react";
+import { CONTRACT_ADDRESSES, ABI } from "../constants/index";
+import { useEffect, useState } from "react";
 import { BigNumber, ethers } from "ethers";
 import { IPosition, notifyType, useNotification } from "@web3uikit/core";
 
@@ -16,15 +11,17 @@ interface contractAddressesInterface {
 }
 
 const RaffleEntrance: NextPage = () => {
-  const { chainId: chainIdHex, isWeb3Enabled } = useMoralis();
+  const { chainId: chainIdHex, isWeb3Enabled, web3 } = useMoralis();
   const chainId = parseInt(chainIdHex!).toString();
-  const addressArr: contractAddressesInterface = contractAddresses;
+  const addressArr: contractAddressesInterface = CONTRACT_ADDRESSES;
   const raffleAddress = chainId in addressArr ? addressArr[chainId][0] : null;
   const [entranceFee, setEntranceFee] = useState("0");
+  const [playerCount, setPlayerCount] = useState("0");
+  const [recentWinner, setRecentWinner] = useState("0");
   const dispatch = useNotification();
 
   const { runContractFunction: enterRaffle } = useWeb3Contract({
-    abi: abi,
+    abi: ABI,
     contractAddress: raffleAddress!,
     functionName: "enterRaffle",
     params: {},
@@ -33,15 +30,31 @@ const RaffleEntrance: NextPage = () => {
 
   const { runContractFunction: getEntranceFee, error: entranceFeeError } =
     useWeb3Contract({
-      abi: abi,
+      abi: ABI,
       contractAddress: raffleAddress!,
       functionName: "getEntranceFee",
       params: {},
     });
 
+  const { runContractFunction: getPlayerCount, error: playerCountError } =
+    useWeb3Contract({
+      abi: ABI,
+      contractAddress: raffleAddress!,
+      functionName: "getPlayerCount",
+      params: {},
+    });
+
+  const { runContractFunction: getRecentWinner, error: recentWinnerError } =
+    useWeb3Contract({
+      abi: ABI,
+      contractAddress: raffleAddress!,
+      functionName: "getRecentWinner",
+      params: {},
+    });
+
   const { runContractFunction: performUpkeep, error: performUpkeepError } =
     useWeb3Contract({
-      abi: abi,
+      abi: ABI,
       contractAddress: raffleAddress!,
       functionName: "performUpkeep",
       params: {},
@@ -52,12 +65,21 @@ const RaffleEntrance: NextPage = () => {
       (await getEntranceFee()) as BigNumber
     ).toString();
     setEntranceFee(entranceFeeFromCall);
+    const playerCountFromCall = (
+      (await getPlayerCount()) as BigNumber
+    ).toString();
+    setPlayerCount(playerCountFromCall);
+    const recentWinnerFromCall = (
+      (await getRecentWinner()) as String
+    ).toString();
+    setRecentWinner(recentWinnerFromCall);
   }
 
   async function handleSuccess(tx) {
     console.log("success");
     await tx.wait(1);
     handleNewNotification("info", null, "topR");
+    updateUI();
   }
 
   const handleNewNotification = function (
@@ -77,9 +99,28 @@ const RaffleEntrance: NextPage = () => {
   useEffect(() => {
     if (isWeb3Enabled) {
       updateUI();
+      listenForWinnerToBePicked();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isWeb3Enabled]);
+
+  // Event listeners
+  async function listenForWinnerToBePicked() {
+    const raffle = new ethers.Contract(raffleAddress!, ABI, web3);
+    console.log("Waiting for a winner ...");
+    await new Promise<void>((resolve, reject) => {
+      raffle.once("WinnerPicked", async () => {
+        console.log("We got a winner!");
+        try {
+          await updateUI();
+          resolve();
+        } catch (error) {
+          console.log(error);
+          reject(error);
+        }
+      });
+    });
+  }
 
   return (
     <div className="p-5 flex flex-row">
@@ -87,8 +128,10 @@ const RaffleEntrance: NextPage = () => {
         <div className="px-4">
           <p className="pb-2">
             The entrance fee is {ethers.utils.formatUnits(entranceFee, "ether")}{" "}
-            eth
+            eth.
           </p>
+          <p className="pb-2">The number of players is {playerCount}.</p>
+          <p className="pb-2">The recent winner is {recentWinner}.</p>
           <button
             className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
             onClick={async () =>
