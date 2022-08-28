@@ -52,14 +52,6 @@ const RaffleEntrance: NextPage = () => {
       params: {},
     });
 
-  const { runContractFunction: performUpkeep, error: performUpkeepError } =
-    useWeb3Contract({
-      abi: ABI,
-      contractAddress: raffleAddress!,
-      functionName: "performUpkeep",
-      params: {},
-    });
-
   async function updateUI() {
     const entranceFeeFromCall = (
       (await getEntranceFee()) as BigNumber
@@ -144,18 +136,6 @@ const RaffleEntrance: NextPage = () => {
             }
           >
             Enter Raffle
-          </button>
-          <button
-            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-            onClick={async () =>
-              await performUpkeep({
-                onError: (error) => {
-                  console.log(error);
-                },
-              })
-            }
-          >
-            perform upkeep
           </button>
         </div>
       ) : (
