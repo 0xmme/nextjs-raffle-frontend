@@ -20,7 +20,11 @@ const RaffleEntrance: NextPage = () => {
   const [recentWinner, setRecentWinner] = useState("0");
   const dispatch = useNotification();
 
-  const { runContractFunction: enterRaffle } = useWeb3Contract({
+  const {
+    runContractFunction: enterRaffle,
+    isFetching,
+    isLoading,
+  } = useWeb3Contract({
     abi: ABI,
     contractAddress: raffleAddress!,
     functionName: "enterRaffle",
@@ -134,8 +138,13 @@ const RaffleEntrance: NextPage = () => {
                 },
               })
             }
+            disabled={isLoading || isFetching}
           >
-            Enter Raffle
+            {isLoading || isFetching ? (
+              <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
+            ) : (
+              <div>Enter Raffle</div>
+            )}
           </button>
         </div>
       ) : (
